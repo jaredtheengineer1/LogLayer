@@ -17,7 +17,7 @@ namespace LogLayer.Services
     {
       var log = new LogEvent
       {
-        TenantId = Guid.Empty,
+        TenantId = new Guid("11111111-1111-1111-1111-111111111111"), // Placeholder tenant ID
         UserGuid = context.UserGuid,
         SessionGuid = context.SessionGuid,
         EventName = request.Event,

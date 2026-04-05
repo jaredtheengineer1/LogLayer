@@ -10,6 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<RequestContext>();
 builder.Services.AddScoped<LogService>();
+DotNetEnv.Env.Load();
 // Get the connection string and replace the placeholder with the environment variable
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
   .Replace("{PasswordPlaceholder}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? throw new InvalidOperationException("DB_PASSWORD environment variable is not set."));
