@@ -7,13 +7,13 @@ namespace LogLayer.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<LogEvent> Logs {get;set;}
+        public DbSet<LogEvent> Logs { get; set; }
 
-      protected override void OnModelCreating(ModelBuilder modelBuilder)
-      {
-        base.OnModelCreating(modelBuilder);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<LogEvent>().Property(e => e.Metadata).HasColumnType("jsonb");
-      }
+            modelBuilder.Entity<LogEvent>().Property(e => e.Metadata).HasColumnType("jsonb");
+        }
     }
 }
