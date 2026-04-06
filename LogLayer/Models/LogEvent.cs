@@ -14,7 +14,7 @@ namespace LogLayer.Models
         public Guid UserGuid { get; set; }
         [Column("session_guid")]
         public Guid SessionGuid { get; set; }
-        [Column("event")]
+        [Column("event_name")]
         public string EventName { get; set; } = default!;
         [Column("route")]
         public string? Route { get; set; }

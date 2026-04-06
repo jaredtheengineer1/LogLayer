@@ -1,6 +1,7 @@
 using LogLayer.Dtos;
 using LogLayer.Services;
 using Microsoft.AspNetCore.Mvc;
+using LogLayer.Models;
 
 [ApiController]
 [Route("[controller]")]
@@ -18,7 +19,7 @@ public class LogsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateLog([FromBody] CreateLogRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Event))
+        if (string.IsNullOrWhiteSpace(request.EventName))
         {
             return BadRequest("EventName is required.");
         }
@@ -29,16 +30,30 @@ public class LogsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetLogs()
+    public async Task<IActionResult> GetLogs([FromQuery] LogQueryParams query)
     {
-        // Placeholder for fetching logs - implement as needed
-        return Ok(new { Message = "GetLogs endpoint is not implemented yet." });
+        var logs = await _logService.GetLogsAsync(query);
+        return Ok(logs);
     }
 
-    [HttpGet("{logId:guid}")]
-    public async Task<IActionResult> GetLogById(Guid logId)
+    [HttpGet("/user/{userId:guid}")]
+    public async Task<IActionResult> GetLogsByUserGuid(Guid userId, [FromQuery] LogQueryParams query)
     {
-        // Placeholder for fetching a log by LogId - implement as needed
-        return Ok(new { Message = $"GetLogById endpoint is not implemented yet for LogId: {logId}" });
+        var logs = await _logService.GetLogsByIdAsync(userId, query, LogGuidType.UserGuid);
+        return Ok(logs);
+    }
+
+    [HttpGet("/tenant/{tenantId:guid}")]
+    public async Task<IActionResult> GetLogsByTenantId(Guid tenantId, [FromQuery] LogQueryParams query)
+    {
+        var logs = await _logService.GetLogsByIdAsync(tenantId, query, LogGuidType.TenantId);
+        return Ok(logs);
+    }
+
+    [HttpGet("/session/{sessionId:guid}")]
+    public async Task<IActionResult> GetLogsBySessionId(Guid sessionId, [FromQuery] LogQueryParams query)
+    {
+        var logs = await _logService.GetLogsByIdAsync(sessionId, query, LogGuidType.SessionGuid);
+        return Ok(logs);
     }
 }
