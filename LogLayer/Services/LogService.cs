@@ -18,9 +18,13 @@ namespace LogLayer.Services
         public async Task<LogEvent> CreateLogAsync(CreateLogRequest request, RequestContext context)
         {
             Console.WriteLine($"creating: {request.EventName}, {request.Route}, {request.Status}");
+            if (context.TenantId == Guid.Empty)
+            {
+                throw new InvalidOperationException("TenantId is not set in RequestContext");
+            }
             var log = new LogEvent
             {
-                TenantId = new Guid("11111111-1111-1111-1111-111111111111"), // Placeholder tenant ID
+                TenantId = context.TenantId,
                 UserGuid = context.UserGuid,
                 SessionGuid = context.SessionGuid,
                 EventName = request.EventName,
@@ -35,8 +39,13 @@ namespace LogLayer.Services
             return log;
         }
 
-        public async Task<List<LogEvent>> GetLogsAsync(LogQueryParams query)
+        public async Task<List<LogEvent>> GetLogsAsync(LogQueryParams query, RequestContext context)
         {
+            if (context.TenantId == Guid.Empty)
+            {
+                throw new InvalidOperationException("TenantId is not set in RequestContext");
+            }
+
             var logsQuery = _db.Logs.AsQueryable();
 
             var end = query.End ?? DateTime.UtcNow;
@@ -72,30 +81,39 @@ namespace LogLayer.Services
             var offset = Math.Max(query.Offset, 0);
 
             return await logsQuery
+              .Where(log => log.TenantId == context.TenantId)
               .OrderByDescending(logsQuery => logsQuery.CreatedAt)
               .Skip(offset)
               .Take(limit)
               .ToListAsync();
         }
 
-        public async Task<List<LogEvent>> GetLogsByIdAsync(Guid guid, LogQueryParams query, LogGuidType guidType)
+        public async Task<List<LogEvent>> GetLogsByIdAsync(Guid guid, LogQueryParams query, LogGuidType guidType, RequestContext context)
         {
-            var logsQuery = _db.Logs.AsQueryable();
+            if (context.TenantId == Guid.Empty)
+            {
+                throw new InvalidOperationException("TenantId is not set in RequestContext");
+            }
+
+            var logsQuery = _db.Logs.Where(log => log.TenantId == context.TenantId);
 
             var end = query.End ?? DateTime.UtcNow;
             var start = query.Start ?? end.AddHours(-12);
 
-            Func<LogEvent, Guid> guidSelector = guidType switch
-            {
-                LogGuidType.UserGuid => log => log.UserGuid,
-                LogGuidType.SessionGuid => log => log.SessionGuid,
-                LogGuidType.TenantId => log => log.TenantId,
-                _ => throw new ArgumentException("Invalid guidType")
-            };
-
             logsQuery = logsQuery
-              .Where(log => log.CreatedAt >= start && log.CreatedAt <= end)
-              .Where(log => guidSelector(log) == guid);
+              .Where(log => log.CreatedAt >= start && log.CreatedAt <= end);
+
+            switch (guidType)
+            {
+                case LogGuidType.UserGuid:
+                    logsQuery = logsQuery.Where(log => log.UserGuid == guid);
+                    break;
+                case LogGuidType.SessionGuid:
+                    logsQuery = logsQuery.Where(log => log.SessionGuid == guid);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid guidType");
+            }
 
             if (!string.IsNullOrWhiteSpace(query.EventName))
             {

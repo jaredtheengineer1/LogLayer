@@ -10,11 +10,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<RequestContext>();
 builder.Services.AddScoped<LogService>();
+builder.Services.AddScoped<EventService>();
+
 DotNetEnv.Env.Load();
-// Get the connection string and replace the placeholder with the environment variable
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-  .Replace("{PasswordPlaceholder}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? throw new InvalidOperationException("DB_PASSWORD environment variable is not set."));
-Console.WriteLine(connectionString);
+
+var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+if (string.IsNullOrWhiteSpace(password))
+    throw new InvalidOperationException("DB_PASSWORD not set");
+
+var template = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(template))
+    throw new InvalidOperationException("DefaultConnection not set");
+
+var connectionString = template.Replace("{PasswordPlaceholder}", password);
+Console.WriteLine($"Using connection string: {connectionString}");
+
 // Add DbContext with PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -41,12 +53,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 
 app.Run();
 

@@ -32,28 +32,28 @@ public class LogsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetLogs([FromQuery] LogQueryParams query)
     {
-        var logs = await _logService.GetLogsAsync(query);
+        var logs = await _logService.GetLogsAsync(query, _context);
         return Ok(logs);
     }
 
     [HttpGet("/user/{userId:guid}")]
     public async Task<IActionResult> GetLogsByUserGuid(Guid userId, [FromQuery] LogQueryParams query)
     {
-        var logs = await _logService.GetLogsByIdAsync(userId, query, LogGuidType.UserGuid);
+        var logs = await _logService.GetLogsByIdAsync(userId, query, LogGuidType.UserGuid, _context);
         return Ok(logs);
     }
 
     [HttpGet("/tenant/{tenantId:guid}")]
     public async Task<IActionResult> GetLogsByTenantId(Guid tenantId, [FromQuery] LogQueryParams query)
     {
-        var logs = await _logService.GetLogsByIdAsync(tenantId, query, LogGuidType.TenantId);
+        var logs = await _logService.GetLogsByIdAsync(tenantId, query, LogGuidType.TenantId, _context);
         return Ok(logs);
     }
 
     [HttpGet("/session/{sessionId:guid}")]
     public async Task<IActionResult> GetLogsBySessionId(Guid sessionId, [FromQuery] LogQueryParams query)
     {
-        var logs = await _logService.GetLogsByIdAsync(sessionId, query, LogGuidType.SessionGuid);
+        var logs = await _logService.GetLogsByIdAsync(sessionId, query, LogGuidType.SessionGuid, _context);
         return Ok(logs);
     }
 }

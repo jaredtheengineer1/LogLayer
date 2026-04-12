@@ -1,8 +1,6 @@
 using LogLayer.Dtos;
 using LogLayer.Services;
-using LogLayer.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.Design;
 
 [ApiController]
 [Route("[controller]")]
@@ -15,5 +13,19 @@ public class EventsController : ControllerBase
     {
         _eventService = eventService;
         _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetEvents([FromQuery] LogQueryParams query)
+    {
+        var result = await _eventService.GetEventCountsAsync(query, _context);
+        return Ok(result);
+    }
+
+    [HttpGet("{eventName}")]
+    public async Task<IActionResult> GetEventTimeline(string eventName, [FromQuery] LogQueryParams query)
+    {
+        var result = await _eventService.GetEventTimelineAsync(eventName, query, _context);
+        return Ok(result);
     }
 }

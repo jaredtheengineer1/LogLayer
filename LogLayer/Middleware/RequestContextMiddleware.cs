@@ -48,10 +48,15 @@ public class RequestContextMiddleware
         }
         context.Response.Cookies.Append("session_guid", sessionGuid.ToString(), CreateCookieOptions(false));
 
-
+        var tenantHeader = context.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+        if (!Guid.TryParse(tenantHeader, out var tenantId))
+        {
+            tenantId = Guid.Empty;
+        }
 
         requestContext.UserGuid = userGuid;
         requestContext.SessionGuid = sessionGuid;
+        requestContext.TenantId = tenantId;
 
         await _next(context);
     }
