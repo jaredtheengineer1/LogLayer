@@ -116,7 +116,20 @@ The `.env` file is used to store sensitive information such as the database pass
 DB_PASSWORD=your-secure-password
 ```
 
-To set up the environment variable:
+#### Updating `appsettings.json`
+To use the `.env` file, update the `appsettings.json` file to include the database connection string with a placeholder for the password:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=your-host;Port=5432;Database=your-database;Username=your-username;Password={DB_PASSWORD}"
+  }
+}
+```
+
+The `{DB_PASSWORD}` placeholder will be replaced with the value from the `.env` file at runtime.
+
+#### Setting Up Environment Variables
+
 - On **Windows**:
   ```bash
   setx DB_PASSWORD "your-secure-password"
@@ -126,10 +139,4 @@ To set up the environment variable:
   export DB_PASSWORD="your-secure-password"
   ```
 
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Ensure the `.env` file is properly configured before running the application.
