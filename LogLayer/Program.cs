@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<RequestContext>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<ExportService>();
 
 DotNetEnv.Env.Load();
 
