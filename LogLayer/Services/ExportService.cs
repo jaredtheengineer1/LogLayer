@@ -121,13 +121,35 @@ namespace LogLayer.Services
             var start = query.Start ?? end.AddHours(-12);
             var limit = Math.Min(query.Limit, 5000);
             var offset = Math.Max(query.Offset, 0);
-            return _dbContext.Logs
+            var logs = _dbContext.Logs
                 .Where(log => log.TenantId == context.TenantId)
                 .Where(log => log.CreatedAt >= start && log.CreatedAt <= end)
                 .OrderByDescending(log => log.CreatedAt)
                 .Skip(offset)
                 .Take(limit)
                 .AsNoTracking();
+
+            if (query.UserGuid.HasValue)
+            {
+                logs = logs.Where(log => log.UserGuid == query.UserGuid);
+            }
+
+            if (query.SessionGuid.HasValue)
+            {
+                logs = logs.Where(log => log.SessionGuid == query.SessionGuid);
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.EventName))
+            {
+                logs = logs.Where(log => log.EventName == query.EventName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Route))
+            {
+                logs = logs.Where(log => log.Route == query.Route);
+            }
+
+            return logs;
         }
         private string EscapeForCsv(string value)
         {
